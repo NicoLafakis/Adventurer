@@ -12,10 +12,11 @@ import { UIScene } from './scenes/UIScene';
  * Built with Phaser 3 + TypeScript + Vite
  */
 
-// Game dimensions - 16:9 aspect ratio, scaled up 3x for crisp pixels
-const GAME_WIDTH = 384;
-const GAME_HEIGHT = 216;
-const SCALE = 3;
+// Game dimensions - 16:9 aspect ratio
+// Render at 2x internal resolution for crisp zooming, display at 3x
+const GAME_WIDTH = 768;   // 2x internal resolution
+const GAME_HEIGHT = 432;  // 2x internal resolution
+const DISPLAY_SCALE = 1.5; // Results in same display size as before (768 * 1.5 = 1152)
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -29,12 +30,12 @@ const config: Phaser.Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
     width: GAME_WIDTH,
     height: GAME_HEIGHT,
-    zoom: SCALE
+    zoom: DISPLAY_SCALE
   },
   physics: {
     default: 'arcade',
     arcade: {
-      gravity: { x: 0, y: 900 },
+      gravity: { x: 0, y: 1800 },  // 2x for internal resolution
       debug: false // Set to true to see hitboxes
     }
   },

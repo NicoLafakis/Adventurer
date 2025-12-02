@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { COLORS } from '../config';
+import { AudioManager } from '../systems/AudioManager';
 
 /**
  * PreloadScene
@@ -17,6 +18,9 @@ export class PreloadScene extends Phaser.Scene {
     
     // Generate placeholder sprites
     this.generatePlaceholderSprites();
+
+    // Generate procedural sounds
+    AudioManager.generateSounds(this);
   }
 
   create(): void {
@@ -273,8 +277,8 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   private generateBackgroundLayers(): void {
-    const width = 384;
-    const height = 216;
+    const width = 768;  // 2x internal resolution
+    const height = 432; // 2x internal resolution
     
     // Far mountains (parallax layer 1)
     const farMountains = this.make.graphics({ x: 0, y: 0 });

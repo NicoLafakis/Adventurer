@@ -49,7 +49,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     jump: Phaser.Input.Keyboard.Key[];
     attack: Phaser.Input.Keyboard.Key[];
     subWeapon: Phaser.Input.Keyboard.Key[];
-  }): void {
+  }, mouseAttack: boolean = false): void {
     if (this.isDead) return;
 
     const body = this.body as Phaser.Physics.Arcade.Body;
@@ -61,7 +61,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     // Handle input
     this.handleMovement(keys, delta);
     this.handleJump(keys, onGround);
-    this.handleAttack(keys);
+    this.handleAttack(keys, mouseAttack);
     this.handleSubWeapon(keys);
     
     // Update invincibility visual
@@ -160,6 +160,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocityY(CONFIG.PLAYER.JUMP_FORCE);
       this.coyoteTimer = 0;
       this.jumpBufferTimer = 0;
+      this.scene.events.emit('player-jump');
     }
     
     // Variable jump height - cut jump short on release
@@ -168,21 +169,24 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  private handleAttack(keys: { attack: Phaser.Input.Keyboard.Key[] }): void {
-    const attackJustPressed = keys.attack.some(key => Phaser.Input.Keyboard.JustDown(key));
-    
+  private handleAttack(keys: { attack: Phaser.Input.Keyboard.Key[] }, mouseAttack: boolean): void {
+    const attackJustPressed = keys.attack.some(key => Phaser.Input.Keyboard.JustDown(key)) || mouseAttack;
+
     if (attackJustPressed && !this.isAttacking) {
       this.isAttacking = true;
       this.attackTimer = 300; // Attack duration in ms
-      
+
       // Brief forward momentum during attack
       const body = this.body as Phaser.Physics.Arcade.Body;
       const attackBoost = this.facingRight ? 50 : -50;
       body.setVelocityX(body.velocity.x + attackBoost);
-      
+
       // Visual feedback - flash white
       this.setTint(0xffffff);
       this.scene.time.delayedCall(50, () => this.clearTint());
+
+      // Emit attack event for sound
+      this.scene.events.emit('player-attack');
     }
   }
 

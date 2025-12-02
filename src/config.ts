@@ -3,70 +3,73 @@
  * Central place for all game tuning values
  */
 
+// World scale factor - 2x internal resolution
+export const WORLD_SCALE = 2;
+
 export const CONFIG = {
-  // Display
-  GAME_WIDTH: 384,
-  GAME_HEIGHT: 216,
+  // Display (internal resolution - 2x for crisp zooming)
+  GAME_WIDTH: 768,
+  GAME_HEIGHT: 432,
   
-  // Physics
-  GRAVITY: 900,
-  
-  // Player
+  // Physics (scaled 2x for internal resolution)
+  GRAVITY: 1800,
+
+  // Player (speeds scaled 2x for internal resolution)
   PLAYER: {
-    MOVE_SPEED: 120,
-    JUMP_FORCE: -340,
+    MOVE_SPEED: 240,
+    JUMP_FORCE: -680,
     JUMP_CUT_MULTIPLIER: 0.5,
-    MAX_FALL_SPEED: 400,
+    MAX_FALL_SPEED: 800,
     COYOTE_TIME: 100, // ms
     JUMP_BUFFER_TIME: 100, // ms
     MAX_HEALTH: 100,
     ATTACK_DAMAGE: 25,
     INVINCIBILITY_TIME: 1000, // ms
-    KNOCKBACK_FORCE: 200,
-    PROJECTILE_SPEED: 250,
+    KNOCKBACK_FORCE: 400,
+    PROJECTILE_SPEED: 500,
     PROJECTILE_DAMAGE: 20,
     PROJECTILE_COOLDOWN: 400 // ms
   },
   
-  // Camera
+  // Camera (zoom values halved for 2x internal resolution)
   CAMERA: {
-    DEFAULT_ZOOM: 1,
-    MIN_ZOOM: 0.6,
-    MAX_ZOOM: 1.6,
+    DEFAULT_ZOOM: 0.5,      // Was 1.0, halved for 2x resolution
+    MIN_ZOOM: 0.3,          // Was 0.6, halved
+    MAX_ZOOM: 0.8,          // Was 1.6, halved
     ZOOM_SPEED: 0.02,
     LERP_X: 0.1,
     LERP_Y: 0.1,
-    LOOK_AHEAD_DISTANCE: 40,
+    LOOK_AHEAD_DISTANCE: 80,  // 2x for internal resolution
     LOOK_AHEAD_SPEED: 0.05,
-    DEADZONE_WIDTH: 50,
-    DEADZONE_HEIGHT: 30,
+    DEADZONE_WIDTH: 100,      // 2x for internal resolution
+    DEADZONE_HEIGHT: 60,      // 2x for internal resolution
     SHAKE_DURATION: 100,
     SHAKE_INTENSITY: 0.01
   },
   
-  // Enemies
+  // Enemies (speeds/distances scaled 2x for internal resolution)
   WOLF: {
     HEALTH: 40,
     DAMAGE: 15,
-    MOVE_SPEED: 70,
-    CHARGE_SPEED: 130,
-    DETECTION_RANGE: 180,
-    ATTACK_RANGE: 40,
-    PATROL_DISTANCE: 100,
-    LEAP_FORCE_X: 200,
-    LEAP_FORCE_Y: -150,
+    MOVE_SPEED: 140,
+    CHARGE_SPEED: 260,
+    DETECTION_RANGE: 360,
+    ATTACK_RANGE: 80,
+    PATROL_DISTANCE: 200,
+    LEAP_FORCE_X: 400,
+    LEAP_FORCE_Y: -300,
     COIN_DROP_MIN: 3,
     COIN_DROP_MAX: 5
   },
-  
+
   BAT: {
     HEALTH: 15,
     DAMAGE: 10,
-    FLY_SPEED: 80,
-    SWOOP_SPEED: 150,
-    DETECTION_RANGE: 150,
-    WAKE_UP_RANGE: 120,
-    HOVER_AMPLITUDE: 20,
+    FLY_SPEED: 160,
+    SWOOP_SPEED: 300,
+    DETECTION_RANGE: 300,
+    WAKE_UP_RANGE: 240,
+    HOVER_AMPLITUDE: 40,
     COIN_DROP_MIN: 1,
     COIN_DROP_MAX: 3
   },
@@ -87,14 +90,14 @@ export const CONFIG = {
   }
 } as const;
 
-// Camera zone presets for Level 1
+// Camera zone presets for Level 1 (halved for 2x internal resolution)
 export const CAMERA_ZONES = {
-  VISTA: { zoom: 0.7, name: 'Vista - Wide scenic shot' },
-  DEFAULT: { zoom: 1.0, name: 'Default gameplay' },
-  COMBAT: { zoom: 0.9, name: 'Combat arena' },
-  TIGHT: { zoom: 1.4, name: 'Tight corridor' },
-  BOSS: { zoom: 0.8, name: 'Boss arena' },
-  SHOP: { zoom: 1.1, name: 'Shop - Intimate' }
+  VISTA: { zoom: 0.35, name: 'Vista - Wide scenic shot' },     // Was 0.7
+  DEFAULT: { zoom: 0.5, name: 'Default gameplay' },            // Was 1.0
+  COMBAT: { zoom: 0.45, name: 'Combat arena' },                // Was 0.9
+  TIGHT: { zoom: 0.7, name: 'Tight corridor' },                // Was 1.4
+  BOSS: { zoom: 0.4, name: 'Boss arena' },                     // Was 0.8
+  SHOP: { zoom: 0.55, name: 'Shop - Intimate' }                // Was 1.1
 } as const;
 
 // Color palette
