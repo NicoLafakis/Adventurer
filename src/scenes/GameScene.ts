@@ -379,12 +379,9 @@ export class GameScene extends Phaser.Scene {
     );
   }
 
-  private handlePlayerEnemyCollision(
-    playerObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
-    enemyObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile
-  ): void {
-    const player = playerObj as Player;
-    const enemy = enemyObj as Wolf | Bat;
+  private handlePlayerEnemyCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (playerObj, enemyObj) => {
+    const player = playerObj as unknown as Player;
+    const enemy = enemyObj as unknown as Wolf | Bat;
     
     if (player.isAttacking && !player.isInvincible) {
       // Player is attacking - damage enemy
@@ -397,11 +394,8 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private handleCoinCollection(
-    playerObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile,
-    coinObj: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Tilemaps.Tile
-  ): void {
-    const coin = coinObj as Phaser.Physics.Arcade.Sprite;
+  private handleCoinCollection: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (_playerObj, coinObj) => {
+    const coin = coinObj as unknown as Phaser.Physics.Arcade.Sprite;
     
     // Collect coin
     GameState.addCoins(1);

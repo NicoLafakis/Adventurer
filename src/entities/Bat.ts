@@ -65,7 +65,7 @@ export class Bat extends Phaser.Physics.Arcade.Sprite {
     this.setFlipY(true);
   }
 
-  update(time: number, delta: number, player: Player): void {
+  update(_time: number, delta: number, player: Player): void {
     if (this.state === BatState.DEAD) return;
     
     const body = this.body as Phaser.Physics.Arcade.Body;

@@ -30,9 +30,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private invincibilityTimer: number = 0;
   private attackTimer: number = 0;
   
-  // Physics helpers
-  private wasOnGround: boolean = false;
-
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player');
     
@@ -45,7 +42,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setDepth(10);
   }
 
-  update(time: number, delta: number, keys: {
+  update(_time: number, delta: number, keys: {
     left: Phaser.Input.Keyboard.Key[];
     right: Phaser.Input.Keyboard.Key[];
     jump: Phaser.Input.Keyboard.Key[];
@@ -66,9 +63,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     
     // Update invincibility visual
     this.updateInvincibility(delta);
-    
-    // Track ground state for coyote time
-    this.wasOnGround = onGround;
     
     // Clamp fall speed
     if (body.velocity.y > CONFIG.PLAYER.MAX_FALL_SPEED) {
@@ -113,7 +107,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private handleMovement(keys: {
     left: Phaser.Input.Keyboard.Key[];
     right: Phaser.Input.Keyboard.Key[];
-  }, delta: number): void {
+  }, _delta: number): void {
     const body = this.body as Phaser.Physics.Arcade.Body;
     
     const leftPressed = keys.left.some(key => key.isDown);
@@ -141,7 +135,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  private handleJump(keys: { jump: Phaser.Input.Keyboard.Key[] }, onGround: boolean): void {
+  private handleJump(keys: { jump: Phaser.Input.Keyboard.Key[] }, _onGround: boolean): void {
     const body = this.body as Phaser.Physics.Arcade.Body;
     
     // Check for jump press
@@ -184,7 +178,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  private updateInvincibility(delta: number): void {
+  private updateInvincibility(_delta: number): void {
     if (this.isInvincible) {
       // Flashing effect
       const flashRate = 100; // ms

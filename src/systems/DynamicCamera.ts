@@ -61,7 +61,7 @@ export class DynamicCamera {
   /**
    * Smoothly transition to target zoom level
    */
-  private updateZoom(delta: number): void {
+  private updateZoom(_delta: number): void {
     if (Math.abs(this.currentZoom - this.targetZoom) < 0.001) {
       this.currentZoom = this.targetZoom;
       return;
@@ -80,7 +80,7 @@ export class DynamicCamera {
   /**
    * Look ahead in the direction of player movement
    */
-  private updateLookAhead(delta: number): void {
+  private updateLookAhead(_delta: number): void {
     // Calculate player velocity
     const velocityX = this.target.x - this.lastTargetPosition.x;
     const velocityY = this.target.y - this.lastTargetPosition.y;
@@ -210,7 +210,6 @@ export class DynamicCamera {
    */
   cinematicZoom(zoom: number, duration: number = 1000): Promise<void> {
     return new Promise(resolve => {
-      const startZoom = this.currentZoom;
       const endZoom = Phaser.Math.Clamp(zoom, CONFIG.CAMERA.MIN_ZOOM, CONFIG.CAMERA.MAX_ZOOM);
       
       this.scene.tweens.add({

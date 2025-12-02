@@ -143,7 +143,7 @@ export class UIScene extends Phaser.Scene {
     }
   }
 
-  private updateCoins(amount: number): void {
+  private updateCoins(_amount: number): void {
     // Pop animation for coin text
     this.tweens.add({
       targets: this.coinText,
