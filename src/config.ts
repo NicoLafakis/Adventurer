@@ -14,7 +14,7 @@ export const CONFIG = {
   // Player
   PLAYER: {
     MOVE_SPEED: 120,
-    JUMP_FORCE: -300,
+    JUMP_FORCE: -340,
     JUMP_CUT_MULTIPLIER: 0.5,
     MAX_FALL_SPEED: 400,
     COYOTE_TIME: 100, // ms
@@ -22,7 +22,10 @@ export const CONFIG = {
     MAX_HEALTH: 100,
     ATTACK_DAMAGE: 25,
     INVINCIBILITY_TIME: 1000, // ms
-    KNOCKBACK_FORCE: 200
+    KNOCKBACK_FORCE: 200,
+    PROJECTILE_SPEED: 250,
+    PROJECTILE_DAMAGE: 20,
+    PROJECTILE_COOLDOWN: 400 // ms
   },
   
   // Camera

@@ -3,6 +3,7 @@ import { CONFIG, CAMERA_ZONES } from '../config';
 import { Player } from '../entities/Player';
 import { Wolf } from '../entities/Wolf';
 import { Bat } from '../entities/Bat';
+import { Projectile } from '../entities/Projectile';
 import { DynamicCamera } from '../systems/DynamicCamera';
 import { CameraZone } from '../systems/CameraZone';
 import { GameState } from '../systems/GameState';
@@ -16,6 +17,7 @@ export class GameScene extends Phaser.Scene {
   player!: Player;
   enemies!: Phaser.GameObjects.Group;
   coins!: Phaser.GameObjects.Group;
+  projectiles!: Phaser.GameObjects.Group;
   
   // Tilemap layers
   groundLayer!: Phaser.GameObjects.Group;
@@ -37,6 +39,7 @@ export class GameScene extends Phaser.Scene {
     attack: Phaser.Input.Keyboard.Key[];
     left: Phaser.Input.Keyboard.Key[];
     right: Phaser.Input.Keyboard.Key[];
+    subWeapon: Phaser.Input.Keyboard.Key[];
   };
   
   // Level bounds
@@ -68,7 +71,10 @@ export class GameScene extends Phaser.Scene {
     
     // Create coins
     this.createCoins();
-    
+
+    // Create projectiles group
+    this.projectiles = this.add.group();
+
     // Setup camera
     this.setupCamera();
     
@@ -81,6 +87,9 @@ export class GameScene extends Phaser.Scene {
     // Create camera zones
     this.createCameraZones();
     
+    // Listen for projectile spawn events
+    this.events.on('player-throw-projectile', this.spawnProjectile, this);
+
     // Emit ready event for UI
     this.events.emit('scene-ready');
   }
@@ -95,6 +104,13 @@ export class GameScene extends Phaser.Scene {
     this.enemies.getChildren().forEach((enemy: Phaser.GameObjects.GameObject) => {
       if ((enemy as any).update) {
         (enemy as any).update(time, delta, this.player);
+      }
+    });
+
+    // Update projectiles
+    this.projectiles.getChildren().forEach((proj: Phaser.GameObjects.GameObject) => {
+      if ((proj as Projectile).update) {
+        (proj as Projectile).update(time, delta);
       }
     });
     
@@ -349,6 +365,10 @@ export class GameScene extends Phaser.Scene {
       attack: [
         this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.J),
         this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.Z)
+      ],
+      subWeapon: [
+        this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.K),
+        this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.X)
       ]
     };
   }
@@ -377,6 +397,34 @@ export class GameScene extends Phaser.Scene {
       undefined,
       this
     );
+
+    // Projectiles vs enemies
+    this.physics.add.overlap(
+      this.projectiles,
+      this.enemies,
+      this.handleProjectileEnemyCollision,
+      undefined,
+      this
+    );
+  }
+
+  private spawnProjectile(x: number, y: number, facingRight: boolean): void {
+    const projectile = new Projectile(this, x, y, facingRight);
+    this.projectiles.add(projectile);
+  }
+
+  private handleProjectileEnemyCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (projObj, enemyObj) => {
+    const projectile = projObj as unknown as Projectile;
+    const enemy = enemyObj as unknown as Wolf | Bat;
+
+    // Damage enemy
+    enemy.takeDamage(projectile.damage);
+
+    // Small screen shake
+    this.dynamicCamera.shake(0.2);
+
+    // Destroy projectile
+    projectile.onHitEnemy();
   }
 
   private handlePlayerEnemyCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (playerObj, enemyObj) => {

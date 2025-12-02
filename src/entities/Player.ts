@@ -29,6 +29,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private jumpBufferTimer: number = 0;
   private invincibilityTimer: number = 0;
   private attackTimer: number = 0;
+  private projectileCooldown: number = 0;
   
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player');
@@ -47,19 +48,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     right: Phaser.Input.Keyboard.Key[];
     jump: Phaser.Input.Keyboard.Key[];
     attack: Phaser.Input.Keyboard.Key[];
+    subWeapon: Phaser.Input.Keyboard.Key[];
   }): void {
     if (this.isDead) return;
-    
+
     const body = this.body as Phaser.Physics.Arcade.Body;
     const onGround = body.blocked.down || body.touching.down;
-    
+
     // Update timers
     this.updateTimers(delta, onGround);
-    
+
     // Handle input
     this.handleMovement(keys, delta);
     this.handleJump(keys, onGround);
     this.handleAttack(keys);
+    this.handleSubWeapon(keys);
     
     // Update invincibility visual
     this.updateInvincibility(delta);
@@ -101,6 +104,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.isInvincible = false;
         this.setAlpha(1);
       }
+    }
+
+    // Projectile cooldown
+    if (this.projectileCooldown > 0) {
+      this.projectileCooldown -= delta;
     }
   }
 
@@ -174,6 +182,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       
       // Visual feedback - flash white
       this.setTint(0xffffff);
+      this.scene.time.delayedCall(50, () => this.clearTint());
+    }
+  }
+
+  private handleSubWeapon(keys: { subWeapon: Phaser.Input.Keyboard.Key[] }): void {
+    const subWeaponJustPressed = keys.subWeapon.some(key => Phaser.Input.Keyboard.JustDown(key));
+
+    if (subWeaponJustPressed && this.projectileCooldown <= 0) {
+      this.projectileCooldown = CONFIG.PLAYER.PROJECTILE_COOLDOWN;
+
+      // Emit event for GameScene to spawn the projectile
+      this.scene.events.emit('player-throw-projectile', this.x, this.y, this.facingRight);
+
+      // Visual feedback
+      this.setTint(0xccccff);
       this.scene.time.delayedCall(50, () => this.clearTint());
     }
   }

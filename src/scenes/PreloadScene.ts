@@ -67,6 +67,9 @@ export class PreloadScene extends Phaser.Scene {
     
     // Coin sprite (12x12)
     this.generateCoinSprite();
+
+    // Knife sprite (16x8)
+    this.generateKnifeSprite();
     
     // Ground tile (16x16)
     this.generateGroundTile();
@@ -195,6 +198,29 @@ export class PreloadScene extends Phaser.Scene {
     graphics.strokeCircle(6, 6, 3);
     
     graphics.generateTexture('coin', 12, 12);
+    graphics.destroy();
+  }
+
+  private generateKnifeSprite(): void {
+    const graphics = this.make.graphics({ x: 0, y: 0 });
+
+    // Silver blade
+    graphics.fillStyle(0xc0c0c0);
+    graphics.fillTriangle(14, 4, 6, 2, 6, 6);
+
+    // Blade edge highlight
+    graphics.fillStyle(0xe0e0e0);
+    graphics.fillTriangle(14, 4, 8, 3, 8, 5);
+
+    // Handle
+    graphics.fillStyle(0x5a4030);
+    graphics.fillRect(2, 2, 5, 4);
+
+    // Guard
+    graphics.fillStyle(0x8b7355);
+    graphics.fillRect(6, 1, 2, 6);
+
+    graphics.generateTexture('knife', 16, 8);
     graphics.destroy();
   }
 
