@@ -22,7 +22,7 @@ Basic platformer with:
 **Date:** December 5, 2024
 **Status:** STABLE
 **Git Tag:** `v0.2.0`
-**Git Commit:** `84ac1e6`
+**Git Commit:** `c3776c8`
 
 ### What's Working:
 - **Main Menu Scene** - Title screen with animated background, START GAME and SETTINGS buttons
