@@ -3,7 +3,7 @@ import { CONFIG, CAMERA_ZONES, WORLD_SCALE } from '../config';
 import { Player } from '../entities/Player';
 import { Wolf } from '../entities/Wolf';
 import { Bat } from '../entities/Bat';
-import { Projectile } from '../entities/Projectile';
+import { Boomerang } from '../entities/Boomerang';
 import { DynamicCamera } from '../systems/DynamicCamera';
 import { CameraZone } from '../systems/CameraZone';
 import { GameState } from '../systems/GameState';
@@ -147,10 +147,10 @@ export class GameScene extends Phaser.Scene {
       }
     });
 
-    // Update projectiles
+    // Update boomerangs
     this.projectiles.getChildren().forEach((proj: Phaser.GameObjects.GameObject) => {
-      if ((proj as Projectile).update) {
-        (proj as Projectile).update(time, delta);
+      if ((proj as Boomerang).update) {
+        (proj as Boomerang).update(time, delta);
       }
     });
     
@@ -498,29 +498,43 @@ export class GameScene extends Phaser.Scene {
       this
     );
 
-    // Projectiles vs enemies
+    // Boomerangs vs enemies
     this.physics.add.overlap(
       this.projectiles,
       this.enemies,
-      this.handleProjectileEnemyCollision,
+      this.handleBoomerangEnemyCollision,
+      undefined,
+      this
+    );
+
+    // Boomerangs vs platforms (triggers return)
+    this.physics.add.collider(
+      this.projectiles,
+      this.platforms,
+      this.handleBoomerangPlatformCollision,
       undefined,
       this
     );
   }
 
   private spawnProjectile(x: number, y: number, facingRight: boolean): void {
-    const projectile = new Projectile(this, x, y, facingRight);
-    projectile.setScale(WORLD_SCALE);
-    this.projectiles.add(projectile);
+    // Only allow one boomerang at a time
+    if (this.projectiles.getLength() > 0) {
+      return;
+    }
+
+    const boomerang = new Boomerang(this, x, y, facingRight, this.player);
+    boomerang.setScale(WORLD_SCALE);
+    this.projectiles.add(boomerang);
     this.audioManager?.playThrow();
   }
 
-  private handleProjectileEnemyCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (projObj, enemyObj) => {
-    const projectile = projObj as unknown as Projectile;
+  private handleBoomerangEnemyCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (projObj, enemyObj) => {
+    const boomerang = projObj as unknown as Boomerang;
     const enemy = enemyObj as unknown as Wolf | Bat;
 
     // Damage enemy
-    enemy.takeDamage(projectile.damage);
+    enemy.takeDamage(boomerang.damage);
 
     // Small screen shake
     this.dynamicCamera.shake(0.2);
@@ -531,8 +545,15 @@ export class GameScene extends Phaser.Scene {
       this.audioManager?.playEnemyDeath();
     }
 
-    // Destroy projectile
-    projectile.onHitEnemy();
+    // Trigger boomerang return (unless it can pierce)
+    boomerang.onHitEnemy();
+  }
+
+  private handleBoomerangPlatformCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (projObj) => {
+    const boomerang = projObj as unknown as Boomerang;
+
+    // Trigger return when hitting a wall
+    boomerang.onHitWall();
   }
 
   private handlePlayerEnemyCollision: Phaser.Types.Physics.Arcade.ArcadePhysicsCallback = (playerObj, enemyObj) => {

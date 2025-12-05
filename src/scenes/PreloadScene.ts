@@ -108,8 +108,8 @@ export class PreloadScene extends Phaser.Scene {
     // Coin sprite (12x12)
     this.generateCoinSprite();
 
-    // Knife sprite (16x8)
-    this.generateKnifeSprite();
+    // Boomerang sprite (16x16)
+    this.generateBoomerangSprite();
     
     // Ground tile (16x16)
     this.generateGroundTile();
@@ -308,26 +308,36 @@ export class PreloadScene extends Phaser.Scene {
     graphics.destroy();
   }
 
-  private generateKnifeSprite(): void {
+  private generateBoomerangSprite(): void {
     const graphics = this.make.graphics({ x: 0, y: 0 });
 
-    // Silver blade
-    graphics.fillStyle(0xc0c0c0);
-    graphics.fillTriangle(14, 4, 6, 2, 6, 6);
+    // Boomerang - curved wooden shape (16x16 for better rotation)
+    // Main body - golden/wooden color
+    graphics.fillStyle(0xc9a227);
 
-    // Blade edge highlight
-    graphics.fillStyle(0xe0e0e0);
-    graphics.fillTriangle(14, 4, 8, 3, 8, 5);
+    // Draw boomerang as angled shape
+    // Left arm
+    graphics.fillRect(2, 6, 6, 4);
+    // Center/elbow
+    graphics.fillRect(6, 4, 4, 4);
+    // Right arm (going up)
+    graphics.fillRect(8, 2, 4, 6);
 
-    // Handle
-    graphics.fillStyle(0x5a4030);
-    graphics.fillRect(2, 2, 5, 4);
+    // Highlight on edges
+    graphics.fillStyle(0xe8c547);
+    graphics.fillRect(2, 6, 6, 2);
+    graphics.fillRect(8, 2, 4, 2);
 
-    // Guard
-    graphics.fillStyle(0x8b7355);
-    graphics.fillRect(6, 1, 2, 6);
+    // Dark edge/shadow
+    graphics.fillStyle(0x8b6914);
+    graphics.fillRect(2, 9, 6, 1);
+    graphics.fillRect(8, 6, 2, 2);
 
-    graphics.generateTexture('knife', 16, 8);
+    // Center detail
+    graphics.fillStyle(0xffd700);
+    graphics.fillCircle(8, 6, 2);
+
+    graphics.generateTexture('boomerang', 16, 16);
     graphics.destroy();
   }
 
