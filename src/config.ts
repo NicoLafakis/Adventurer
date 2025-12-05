@@ -16,10 +16,10 @@ export const CONFIG = {
 
   // Player (speeds scaled 2x for internal resolution)
   PLAYER: {
-    MOVE_SPEED: 240,
-    JUMP_FORCE: -680,
-    JUMP_CUT_MULTIPLIER: 0.5,
-    MAX_FALL_SPEED: 800,
+    MOVE_SPEED: 280,
+    JUMP_FORCE: -750,
+    JUMP_CUT_MULTIPLIER: 0.4,
+    MAX_FALL_SPEED: 900,
     COYOTE_TIME: 100, // ms
     JUMP_BUFFER_TIME: 100, // ms
     MAX_HEALTH: 100,

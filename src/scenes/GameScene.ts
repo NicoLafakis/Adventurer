@@ -306,11 +306,13 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.existing(this.player);
     this.player.setScale(S);
 
-    // Setup player physics body
+    // Setup player physics body (use unscaled values - Phaser applies sprite scale automatically)
     const body = this.player.body as Phaser.Physics.Arcade.Body;
     body.setCollideWorldBounds(true);
-    body.setSize(16 * S, 28 * S);
-    body.setOffset(8 * S, 4 * S);
+    // Body covers most of the 32x32 sprite, leaving some margin
+    body.setSize(14, 26);
+    // Offset to center horizontally and align feet with bottom of sprite
+    body.setOffset(9, 6);
   }
 
   private createEnemies(): void {

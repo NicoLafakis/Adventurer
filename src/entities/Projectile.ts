@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONFIG, WORLD_SCALE } from '../config';
+import { CONFIG } from '../config';
 
 /**
  * Projectile
@@ -24,9 +24,10 @@ export class Projectile extends Phaser.Physics.Arcade.Sprite {
     this.speed = CONFIG.PLAYER.PROJECTILE_SPEED;
     this.direction = facingRight ? 1 : -1;
 
-    // Setup physics body - scale body size for WORLD_SCALE
+    // Setup physics body (unscaled - sprite scale is applied by GameScene)
     const body = this.body as Phaser.Physics.Arcade.Body;
-    body.setSize(12 * WORLD_SCALE, 6 * WORLD_SCALE);
+    body.setSize(14, 6);
+    body.setOffset(1, 1);
     body.setAllowGravity(false);
     body.setVelocityX(this.speed * this.direction);
 
