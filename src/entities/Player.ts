@@ -23,6 +23,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   isInvincible: boolean = false;
   facingRight: boolean = true;
   isDead: boolean = false;
+  private currentAnim: string = 'player_idle';
   
   // Timers (in ms)
   private coyoteTimer: number = 0;
@@ -33,14 +34,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player');
-    
+
     // Initialize stats
     this.maxHealth = CONFIG.PLAYER.MAX_HEALTH;
     this.health = this.maxHealth;
     this.damage = CONFIG.PLAYER.ATTACK_DAMAGE;
-    
+
     // Set display properties
     this.setDepth(10);
+
+    // Start with idle animation
+    this.play('player_idle');
   }
 
   update(_time: number, delta: number, keys: {
@@ -66,14 +70,42 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     
     // Update invincibility visual
     this.updateInvincibility(delta);
-    
+
     // Clamp fall speed
     if (body.velocity.y > CONFIG.PLAYER.MAX_FALL_SPEED) {
       body.setVelocityY(CONFIG.PLAYER.MAX_FALL_SPEED);
     }
-    
+
     // Update sprite flip
     this.setFlipX(!this.facingRight);
+
+    // Update animation
+    this.updateAnimation(onGround, body.velocity.x, body.velocity.y);
+  }
+
+  private updateAnimation(onGround: boolean, velocityX: number, velocityY: number): void {
+    let newAnim = 'player_idle';
+
+    if (!onGround) {
+      // In the air
+      if (velocityY < 0) {
+        newAnim = 'player_jump';
+      } else {
+        newAnim = 'player_fall';
+      }
+    } else if (Math.abs(velocityX) > 10) {
+      // Walking
+      newAnim = 'player_walk';
+    } else {
+      // Standing still
+      newAnim = 'player_idle';
+    }
+
+    // Only change animation if it's different
+    if (newAnim !== this.currentAnim) {
+      this.currentAnim = newAnim;
+      this.play(newAnim, true);
+    }
   }
 
   private updateTimers(delta: number, onGround: boolean): void {

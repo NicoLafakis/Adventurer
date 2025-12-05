@@ -24,9 +24,45 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   create(): void {
-    // Start the game
-    this.scene.start('GameScene');
-    this.scene.start('UIScene');
+    // Create player animations
+    this.createPlayerAnimations();
+
+    // Go to main menu
+    this.scene.start('MainMenuScene');
+  }
+
+  private createPlayerAnimations(): void {
+    // Idle animation (single frame)
+    this.anims.create({
+      key: 'player_idle',
+      frames: [{ key: 'player', frame: 0 }],
+      frameRate: 1,
+      repeat: -1
+    });
+
+    // Walk animation (frames 1-4 cycle)
+    this.anims.create({
+      key: 'player_walk',
+      frames: this.anims.generateFrameNumbers('player', { start: 1, end: 4 }),
+      frameRate: 10,
+      repeat: -1
+    });
+
+    // Jump animation (single frame)
+    this.anims.create({
+      key: 'player_jump',
+      frames: [{ key: 'player', frame: 5 }],
+      frameRate: 1,
+      repeat: 0
+    });
+
+    // Fall animation (using jump frame for now)
+    this.anims.create({
+      key: 'player_fall',
+      frames: [{ key: 'player', frame: 5 }],
+      frameRate: 1,
+      repeat: 0
+    });
   }
 
   private createLoadingBar(): void {
@@ -86,34 +122,101 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   private generatePlayerSprite(): void {
+    // Create a spritesheet with multiple frames for animation
+    // Frame layout: 6 frames x 32px = 192px wide, 32px tall
+    // Frames: 0=idle, 1-4=walk cycle, 5=jump
     const graphics = this.make.graphics({ x: 0, y: 0 });
-    
-    // Create a simple adventurer silhouette
+    const frameWidth = 32;
+
+    // Helper function to draw player at specific frame offset with leg positions
+    const drawPlayerFrame = (offsetX: number, leftLegY: number, rightLegY: number, bodyBob: number = 0, capeWave: number = 0) => {
+      // Body
+      graphics.fillStyle(0x2a1a3a);
+      graphics.fillRect(offsetX + 10, 12 + bodyBob, 12, 14);
+
+      // Head
+      graphics.fillStyle(0xd4a574);
+      graphics.fillCircle(offsetX + 16, 8 + bodyBob, 6);
+
+      // Hat (wide-brimmed adventurer hat)
+      graphics.fillStyle(0x1a0a20);
+      graphics.fillRect(offsetX + 7, 2 + bodyBob, 18, 3);
+      graphics.fillRect(offsetX + 11, 0 + bodyBob, 10, 3);
+
+      // Cape with wave animation
+      graphics.fillStyle(0x8b2942);
+      graphics.fillTriangle(
+        offsetX + 10, 14 + bodyBob,
+        offsetX + 4 + capeWave, 28 + bodyBob,
+        offsetX + 16, 26 + bodyBob
+      );
+      graphics.fillTriangle(
+        offsetX + 22, 14 + bodyBob,
+        offsetX + 28 - capeWave, 28 + bodyBob,
+        offsetX + 16, 26 + bodyBob
+      );
+
+      // Left leg
+      graphics.fillStyle(0x1a0a20);
+      graphics.fillRect(offsetX + 11, 24 + leftLegY, 4, 8 - leftLegY);
+
+      // Right leg
+      graphics.fillRect(offsetX + 17, 24 + rightLegY, 4, 8 - rightLegY);
+
+      // Boots (feet)
+      graphics.fillStyle(0x3a2a20);
+      graphics.fillRect(offsetX + 10, 30 + Math.max(leftLegY, 0), 5, 2);
+      graphics.fillRect(offsetX + 16, 30 + Math.max(rightLegY, 0), 6, 2);
+    };
+
+    // Frame 0: Idle stance
+    drawPlayerFrame(0, 0, 0, 0, 0);
+
+    // Frame 1: Walk - left leg forward
+    drawPlayerFrame(frameWidth, -3, 2, -1, 1);
+
+    // Frame 2: Walk - passing (both legs center)
+    drawPlayerFrame(frameWidth * 2, 0, 0, 0, 0);
+
+    // Frame 3: Walk - right leg forward
+    drawPlayerFrame(frameWidth * 3, 2, -3, -1, -1);
+
+    // Frame 4: Walk - passing (back to center)
+    drawPlayerFrame(frameWidth * 4, 0, 0, 0, 0);
+
+    // Frame 5: Jump (legs tucked)
+    const jumpOffset = frameWidth * 5;
     // Body
     graphics.fillStyle(0x2a1a3a);
-    graphics.fillRect(10, 12, 12, 16);
-    
+    graphics.fillRect(jumpOffset + 10, 14, 12, 12);
     // Head
     graphics.fillStyle(0xd4a574);
-    graphics.fillCircle(16, 8, 6);
-    
+    graphics.fillCircle(jumpOffset + 16, 9, 6);
     // Hat
     graphics.fillStyle(0x1a0a20);
-    graphics.fillRect(8, 2, 16, 4);
-    graphics.fillRect(12, 0, 8, 4);
-    
-    // Cape
+    graphics.fillRect(jumpOffset + 7, 3, 18, 3);
+    graphics.fillRect(jumpOffset + 11, 1, 10, 3);
+    // Cape (flowing up during jump)
     graphics.fillStyle(0x8b2942);
-    graphics.fillTriangle(10, 14, 6, 30, 16, 28);
-    graphics.fillTriangle(22, 14, 26, 30, 16, 28);
-    
-    // Legs
+    graphics.fillTriangle(jumpOffset + 10, 16, jumpOffset + 2, 26, jumpOffset + 16, 24);
+    graphics.fillTriangle(jumpOffset + 22, 16, jumpOffset + 30, 26, jumpOffset + 16, 24);
+    // Tucked legs
     graphics.fillStyle(0x1a0a20);
-    graphics.fillRect(11, 26, 4, 6);
-    graphics.fillRect(17, 26, 4, 6);
-    
-    graphics.generateTexture('player', 32, 32);
+    graphics.fillRect(jumpOffset + 10, 24, 5, 5);
+    graphics.fillRect(jumpOffset + 17, 24, 5, 5);
+    // Boots
+    graphics.fillStyle(0x3a2a20);
+    graphics.fillRect(jumpOffset + 9, 28, 6, 2);
+    graphics.fillRect(jumpOffset + 17, 28, 6, 2);
+
+    graphics.generateTexture('player', frameWidth * 6, 32);
     graphics.destroy();
+
+    // Add frame data to the generated texture for animation
+    const texture = this.textures.get('player');
+    for (let i = 0; i < 6; i++) {
+      texture.add(i, 0, i * frameWidth, 0, frameWidth, 32);
+    }
   }
 
   private generateWolfSprite(): void {

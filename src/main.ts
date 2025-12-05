@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { PreloadScene } from './scenes/PreloadScene';
+import { MainMenuScene } from './scenes/MainMenuScene';
+import { SettingsScene } from './scenes/SettingsScene';
 import { GameScene } from './scenes/GameScene';
 import { UIScene } from './scenes/UIScene';
 
@@ -39,7 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
       debug: false // Set to true to see hitboxes
     }
   },
-  scene: [BootScene, PreloadScene, GameScene, UIScene],
+  scene: [BootScene, PreloadScene, MainMenuScene, SettingsScene, GameScene, UIScene],
   input: {
     keyboard: true,
     gamepad: true

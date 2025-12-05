@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CONFIG } from '../config';
+import { SettingsManager } from './SettingsManager';
 
 /**
  * AudioManager
@@ -240,9 +240,10 @@ export class AudioManager {
       filter.type = 'lowpass';
       filter.frequency.value = 400;
 
+      const musicVol = SettingsManager.getMusicVolume();
       gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(CONFIG.AUDIO.MUSIC_VOLUME * 0.15, now + 2);
-      gain.gain.setValueAtTime(CONFIG.AUDIO.MUSIC_VOLUME * 0.15, now + duration - 2);
+      gain.gain.linearRampToValueAtTime(musicVol * 0.15, now + 2);
+      gain.gain.setValueAtTime(musicVol * 0.15, now + duration - 2);
       gain.gain.linearRampToValueAtTime(0, now + duration);
 
       osc.connect(filter);
@@ -273,30 +274,30 @@ export class AudioManager {
 
   // Convenience methods for playing sounds
   playAttack(): void {
-    this.scene.sound.play('sfx_attack', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_attack', { volume: SettingsManager.getSFXVolume() });
   }
 
   playHit(): void {
-    this.scene.sound.play('sfx_hit', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_hit', { volume: SettingsManager.getSFXVolume() });
   }
 
   playCoin(): void {
-    this.scene.sound.play('sfx_coin', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_coin', { volume: SettingsManager.getSFXVolume() });
   }
 
   playJump(): void {
-    this.scene.sound.play('sfx_jump', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_jump', { volume: SettingsManager.getSFXVolume() });
   }
 
   playHurt(): void {
-    this.scene.sound.play('sfx_hurt', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_hurt', { volume: SettingsManager.getSFXVolume() });
   }
 
   playEnemyDeath(): void {
-    this.scene.sound.play('sfx_enemy_death', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_enemy_death', { volume: SettingsManager.getSFXVolume() });
   }
 
   playThrow(): void {
-    this.scene.sound.play('sfx_throw', { volume: CONFIG.AUDIO.SFX_VOLUME });
+    this.scene.sound.play('sfx_throw', { volume: SettingsManager.getSFXVolume() });
   }
 }

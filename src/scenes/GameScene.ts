@@ -18,7 +18,7 @@ export class GameScene extends Phaser.Scene {
   player!: Player;
   enemies!: Phaser.GameObjects.Group;
   coins!: Phaser.GameObjects.Group;
-  projectiles!: Phaser.GameObjects.Group;
+  projectiles!: Phaser.Physics.Arcade.Group;
   
   // Tilemap layers
   groundLayer!: Phaser.GameObjects.Group;
@@ -77,8 +77,10 @@ export class GameScene extends Phaser.Scene {
     // Create coins
     this.createCoins();
 
-    // Create projectiles group
-    this.projectiles = this.add.group();
+    // Create projectiles group (physics group for collision detection)
+    this.projectiles = this.physics.add.group({
+      runChildUpdate: false // We'll manually update projectiles
+    });
 
     // Setup camera
     this.setupCamera();
@@ -165,20 +167,26 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createBackgrounds(): void {
+    // Calculate max visible size at minimum zoom
+    // At 0.3 zoom, visible area is roughly 768/0.3 x 432/0.3 = 2560x1440
+    const maxWidth = Math.ceil(CONFIG.GAME_WIDTH / CONFIG.CAMERA.MIN_ZOOM);
+    const maxHeight = Math.ceil(CONFIG.GAME_HEIGHT / CONFIG.CAMERA.MIN_ZOOM);
+
     // Far background (sky + mountains) - slowest parallax
-    this.bgFar = this.add.tileSprite(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT, 'bg_far');
+    this.bgFar = this.add.tileSprite(0, 0, maxWidth, maxHeight, 'bg_far');
     this.bgFar.setOrigin(0, 0);
     this.bgFar.setScrollFactor(0);
     this.bgFar.setDepth(-100);
 
-    // Castle silhouette
-    this.bgCastle = this.add.image(CONFIG.GAME_WIDTH * 0.8, CONFIG.GAME_HEIGHT * 0.3, 'bg_castle');
-    this.bgCastle.setScrollFactor(0.05); // Reduced for 2x world
+    // Castle silhouette - position relative to camera center
+    this.bgCastle = this.add.image(0, 0, 'bg_castle');
+    this.bgCastle.setScrollFactor(0);
     this.bgCastle.setDepth(-90);
     this.bgCastle.setAlpha(0.8);
+    this.bgCastle.setScale(1.5); // Scale up for visibility at zoom out
 
     // Mid trees - medium parallax
-    this.bgMid = this.add.tileSprite(0, 0, CONFIG.GAME_WIDTH, CONFIG.GAME_HEIGHT, 'bg_mid');
+    this.bgMid = this.add.tileSprite(0, 0, maxWidth, maxHeight, 'bg_mid');
     this.bgMid.setOrigin(0, 0);
     this.bgMid.setScrollFactor(0);
     this.bgMid.setDepth(-50);
@@ -186,11 +194,32 @@ export class GameScene extends Phaser.Scene {
   }
 
   private updateParallax(): void {
-    const camX = this.cameras.main.scrollX;
+    const cam = this.cameras.main;
+    const camX = cam.scrollX;
+    const camY = cam.scrollY;
+    const zoom = cam.zoom;
 
-    // Move backgrounds at different rates for parallax effect (halved for 2x world)
+    // Calculate visible area based on current zoom
+    const visibleWidth = CONFIG.GAME_WIDTH / zoom;
+    const visibleHeight = CONFIG.GAME_HEIGHT / zoom;
+
+    // Position backgrounds to always cover the camera view
+    this.bgFar.setPosition(camX, camY);
+    this.bgFar.setSize(visibleWidth, visibleHeight);
+
+    this.bgMid.setPosition(camX, camY);
+    this.bgMid.setSize(visibleWidth, visibleHeight);
+
+    // Move backgrounds at different rates for parallax effect
     this.bgFar.tilePositionX = camX * 0.05;
     this.bgMid.tilePositionX = camX * 0.15;
+
+    // Position castle with parallax relative to camera center
+    const castleParallaxX = camX * 0.08;
+    this.bgCastle.setPosition(
+      camX + visibleWidth * 0.7 - castleParallaxX,
+      camY + visibleHeight * 0.25
+    );
   }
 
   private createLevel(): void {
