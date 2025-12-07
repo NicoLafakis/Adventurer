@@ -180,9 +180,12 @@ export class SettingsScene extends Phaser.Scene {
         valueText.setText(`${Math.round(currentValue * 100)}%`);
         onChange(currentValue);
 
-        // Play sound for feedback
+        // Save immediately so changes persist
+        SettingsManager.save();
+
+        // Play sound for feedback with new volume
         if (this.sound.get('sfx_coin')) {
-          this.sound.play('sfx_coin', { volume: currentValue * 0.5 });
+          this.sound.play('sfx_coin', { volume: SettingsManager.getSFXVolume() * 0.5 });
         }
       }
     };
@@ -208,7 +211,8 @@ export class SettingsScene extends Phaser.Scene {
     const bindingBg = this.add.rectangle(60, 0, 100, 20, 0x1a0a20);
     bindingBg.setStrokeStyle(1, 0x4a4a5a);
 
-    const bindingText = this.add.text(60, 0, currentKeys.join(', '), {
+    const displayKeys = currentKeys.map(k => this.keyNameToDisplay(k));
+    const bindingText = this.add.text(60, 0, displayKeys.join(', '), {
       fontFamily: 'monospace',
       fontSize: '10px',
       color: '#aaaaaa'
@@ -340,6 +344,19 @@ export class SettingsScene extends Phaser.Scene {
         this.completeRebind(event.code);
       }
     });
+
+    // Listen for mouse buttons during rebinding
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if (this.isRebinding && this.rebindAction) {
+        if (pointer.leftButtonDown()) {
+          this.completeRebind('MOUSE1');
+        } else if (pointer.rightButtonDown()) {
+          this.completeRebind('MOUSE2');
+        } else if (pointer.middleButtonDown()) {
+          this.completeRebind('MOUSE3');
+        }
+      }
+    });
   }
 
   private navigateMenu(direction: number): void {
@@ -392,24 +409,29 @@ export class SettingsScene extends Phaser.Scene {
   private completeRebind(keyCode: string): void {
     if (!this.rebindAction || !this.rebindText) return;
 
-    // Convert key code to display name
+    // Convert key code to internal storage name
     const keyName = this.keyCodeToName(keyCode);
+    // Get user-friendly display name
+    const displayName = this.keyNameToDisplay(keyName);
 
-    // Update keybinding
+    // Update keybinding (stores internal name)
     SettingsManager.setKeybinding(this.rebindAction, [keyName]);
 
-    // Update display
+    // Update display (shows friendly name)
     const item = this.menuItems[this.selectedIndex];
     if (item.bindingText && item.bindingBg) {
-      item.bindingText.setText(keyName);
+      item.bindingText.setText(displayName);
       item.bindingText.setColor('#aaaaaa');
       item.bindingBg.setStrokeStyle(1, 0x4a4a5a);
     }
 
     // Play confirmation sound
     if (this.sound.get('sfx_coin')) {
-      this.sound.play('sfx_coin', { volume: 0.5 });
+      this.sound.play('sfx_coin', { volume: SettingsManager.getSFXVolume() });
     }
+
+    // Save immediately
+    SettingsManager.save();
 
     this.isRebinding = false;
     this.rebindAction = null;
@@ -423,9 +445,10 @@ export class SettingsScene extends Phaser.Scene {
     const item = this.menuItems[this.selectedIndex];
     const bindings = SettingsManager.getKeybindings();
     const originalKeys = bindings[this.rebindAction as keyof typeof bindings];
+    const displayKeys = originalKeys.map(k => this.keyNameToDisplay(k));
 
     if (item.bindingText && item.bindingBg) {
-      item.bindingText.setText(originalKeys.join(', '));
+      item.bindingText.setText(displayKeys.join(', '));
       item.bindingText.setColor('#aaaaaa');
       item.bindingBg.setStrokeStyle(1, 0x4a4a5a);
     }
@@ -435,7 +458,13 @@ export class SettingsScene extends Phaser.Scene {
     this.rebindText = null;
   }
 
+  /**
+   * Convert raw key code to internal storage name
+   */
   private keyCodeToName(keyCode: string): string {
+    // Mouse buttons stay as-is
+    if (keyCode.startsWith('MOUSE')) return keyCode;
+
     // Convert key codes like "KeyA" to "A", "ArrowUp" to "UP"
     if (keyCode.startsWith('Key')) {
       return keyCode.substring(3);
@@ -458,6 +487,23 @@ export class SettingsScene extends Phaser.Scene {
       'AltRight': 'ALT'
     };
     return specialKeys[keyCode] || keyCode.toUpperCase();
+  }
+
+  /**
+   * Convert internal name to user-friendly display name
+   */
+  private keyNameToDisplay(keyName: string): string {
+    const displayNames: Record<string, string> = {
+      'MOUSE1': 'Left Click',
+      'MOUSE2': 'Right Click',
+      'MOUSE3': 'Middle Click',
+      'SPACE': 'Space',
+      'LEFT': '←',
+      'RIGHT': '→',
+      'UP': '↑',
+      'DOWN': '↓'
+    };
+    return displayNames[keyName] || keyName;
   }
 
   private goBack(): void {

@@ -114,12 +114,12 @@ export const COLORS = {
   TEXT_SHADOW: 0x000000
 } as const;
 
-// Input keys
+// Input keys (MOUSE1/2/3 = left/right/middle click)
 export const KEYS = {
   LEFT: ['A', 'LEFT'],
   RIGHT: ['D', 'RIGHT'],
   JUMP: ['SPACE', 'W', 'UP'],
-  ATTACK: ['J', 'Z'],
+  ATTACK: ['J', 'Z', 'MOUSE1'],
   SUB_WEAPON: ['K', 'X'],
   INTERACT: ['E'],
   PAUSE: ['ESC', 'P']
